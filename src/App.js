@@ -2,15 +2,29 @@ import { useState,useEffect } from 'react';
 
 import './App.css';
 import {db} from './firebase-config'
-import {collection, getDocs,addDoc,updateDoc,deleteDoc,doc} from 'firebase/firestore'
+import {collection, getDocs,addDoc,updateDoc,deleteDoc,doc,onSnapshot,query} from 'firebase/firestore'
+// import {
+//   collection,
+//   addDoc,
+//   where,
+//   serverTimestamp,
+//   onSnapshot,
+//   query,
+//   orderBy,
+// } from "firebase/firestore"
+const usersRef=collection(db,"users")
 // import {MessageFilled} from "@ant-design/icons"
 // import { FloatButton} from 'antd'
 
 
 function App() {
+  const [user1s,setUser1s]=useState([])
+
+
   const [newName,setNewName]=useState("")
   const [newAge,setNewAge]=useState(0)
    const [users,setUsers]=useState([])
+
    const usersCollectionRef=collection(db,"users")
 
   const createUser=async()=>{
@@ -39,6 +53,24 @@ function App() {
 
   },[])
 
+
+
+  useEffect(() => {
+    const queryUsers = query(
+      usersRef
+    );
+    const unsuscribe = onSnapshot(queryUsers, (snapshot) => {      let user1s = [];
+      snapshot.forEach((doc) => {
+        user1s.push({ ...doc.data(), id: doc.id });
+      });
+        setUser1s(user1s);
+    });
+    return () => unsuscribe();
+  }, []);
+
+
+
+
   return (
 <>
 <input type='text' placeholder='Name..' onChange={(event)=>setNewName(event.target.value)}/>
@@ -51,6 +83,19 @@ function App() {
     <h1>Age:{user.age}</h1>
     <button onClick={()=>{updateUser(user.id,user.age)}}>Increase Age</button>
     <button onClick={()=>{deleteUser(user.id)}}>Delete user</button>
+    </div>
+  )
+ 
+})}
+
+
+{user1s.map((user1)=>{
+  return (
+    <div>
+    <h1>Name:{user1.name}</h1>
+    <h1>Age:{user1.age}</h1>
+    {/* <button onClick={()=>{updateUser(user.id,user.age)}}>Increase Age</button> */}
+    <button onClick={()=>{deleteUser(user1.id)}}>Delete user1</button>
     </div>
   )
  
